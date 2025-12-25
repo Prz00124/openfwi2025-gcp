@@ -1,0 +1,18 @@
+resources:
+    accelerators: tpu-v5litepod-16
+    accelerator_args:
+        runtime_version: tpu-vm-tf-2.18.0-pod-pjrt-v5e-and-v6
+        tpu_vm: True
+    region: us-central1
+
+    use_spot: True
+
+workdir: .
+
+setup: |
+    sudo apt-get update    
+    pip install --upgrade pip     
+    pip install tensorflow-tpu==2.18.0 -f https://storage.googleapis.com/libtpu-tf-releases/index.html --force-reinstall    
+
+run: |
+    python test_tpu.py

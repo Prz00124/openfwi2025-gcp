@@ -1,0 +1,49 @@
+### to temporary enable gcloud command
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+
+# GCP commands
+### logout
+gcloud auth revoke --all
+
+### login
+gcloud auth login
+
+# https://cloud.google.com/tpu/docs/managing-tpus-tpu-vm?hl=zh-tw#gcloud_3
+### check available vm image in zone
+gcloud compute tpus tpu-vm versions list --zone=us-central1-b
+
+### list tpu vm in zone
+gcloud compute tpus tpu-vm list --zone=us-central1-a
+
+
+### create tpu-vm, tpu node sucks.
+gcloud compute tpus tpu-vm create test123 --zone=us-central1-b --version=tpu-vm-tf-2.16.1-pjrt --accelerator-type=v6e-4 --spot
+gcloud compute tpus tpu-vm create test123 --zone=us-central1-a --version=tpu-vm-tf-2.18.0-pjrt-v5e-and-v6 --accelerator-type=v5litepod-8 --spot
+
+### upload code onto tpu-vm
+gcloud compute tpus tpu-vm scp ./test_tpu.py test123: --zone=us-central1-b
+
+### ssh to vm
+gcloud compute tpus tpu-vm ssh test123 --zone=us-central1-b
+
+### tf dependency
+pip install keras_hub tensorflow-tpu==2.18.0 -f https://storage.googleapis.com/libtpu-tf-releases/index.html --force-reinstall
+
+### delete vm
+gcloud compute tpus tpu-vm delete test123 --zone=us-central1-b
+
+
+### nohupnohup python do_train.py > ./results.log 2>&1 &
+
+
+
+# sky commands
+### check available computing resourse
+sky check
+
+### show available instance
+sky show-gpus
+
+### launch job
+sky launch tpu_single.yaml -c test123 --down 
