@@ -1,0 +1,31 @@
+### to temporary enable gcloud command
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+### login
+gcloud auth login
+
+### check available vm image in zone
+gcloud compute tpus tpu-vm versions list --zone=us-central1-b
+
+### list tpu vm in zone
+gcloud compute tpus tpu-vm list --zone=us-central1-a
+
+### create tpu-vm, tpu node sucks.
+gcloud compute tpus tpu-vm create test123 --zone=us-central1-b --version=v2-alpha-tpuv6e --accelerator-type=v6e-4 --spot
+
+### upload code onto tpu-vm
+gcloud compute tpus tpu-vm scp ./do_train_torch.py test123: --zone=us-central1-b
+gcloud compute tpus tpu-vm scp ./requirements.txt test123: --zone=us-central1-b
+
+### ssh to vm
+gcloud compute tpus tpu-vm ssh test123 --zone=us-central1-b
+
+### dependency
+sudo apt-get update
+sudo apt-get install libopenblas-dev -y
+pip install --upgrade pip
+pip install setuptools==65.5.1
+pip install -r requirements.txt
+
+### delete vm
+gcloud compute tpus tpu-vm delete test123 --zone=us-central1-b

@@ -1,0 +1,10 @@
+numpy
+gcsfs
+cloud-tpu-client
+torch==2.6.0
+--find-links https://storage.googleapis.com/libtpu-releases/index.html
+--find-links https://storage.googleapis.com/libtpu-wheels/index.html
+torch_xla[tpu]~=2.6.0
+lightning[extra]==2.5.2
+tensorflow-cpu==2.16.1
+tensorboard-plugin-profile

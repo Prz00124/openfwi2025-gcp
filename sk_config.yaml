@@ -1,0 +1,22 @@
+resources:
+    accelerators: tpu-v5litepod-4
+    accelerator_args:
+        #runtime_version: v2-alpha-tpuv6e
+        tpu_vm: true
+    region: us-central1
+    use_spot: True
+    
+workdir: .
+
+setup: |
+    pip install cloud-tpu-client
+    sudo apt-get update    
+    sudo apt-get install libopenblas-dev -y
+    pip install --upgrade pip
+    pip install setuptools==65.5.1
+    pip install -r requirements.txt
+
+run: |
+    unset LD_PRELOAD
+    PJRT_DEVICE=TPU TPU_CHIPS_PER_HOST_BOUNDS=2,2,1 TPU_HOST_BOUNDS=1,1,1 \
+    python do_train_torch.py

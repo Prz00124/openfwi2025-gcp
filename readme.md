@@ -1,40 +1,19 @@
-# v5e-4 (single vm)
-v2.16.1 ok
-    gcloud compute tpus tpu-vm create test123 --zone=us-central1-a --version=tpu-vm-tf-2.16.1-pjrt --accelerator-type=v5litepod-8 --spot
+# OpenFWI 2025 on GCP
+This repository is the model training code of my solution to the competition [Yale/UNC-CH - Geophysical Waveform Inversion](https://www.kaggle.com/competitions/waveform-inversion).
 
-v2.18.0 ok
-    gcloud compute tpus tpu-vm create test123 --zone=us-central1-a --version=tpu-vm-tf-2.18.0-pjrt-v5e-and-v6 --accelerator-type=v5litepod-8 --spot
+Built a 12-layer transformer model with ROPE and [Hyper-connection](https://arxiv.org/abs/2409.19606). Training it by torch-lightning with ema-weighted mae loss. 
 
-    run:
-        sudo apt-get update
-        pip install --upgrade pip
-        pip install tensorflow-tpu==2.18.0 -f https://storage.googleapis.com/libtpu-tf-releases/index.html --force-reinstall
+keywords: GCP, TPU, SkyPilot, PyTorch-Lightning
 
-# v5e-16 (pod slice)
-v2.16.1 ok
-    gcloud compute tpus tpu-vm create test123 --zone=us-central1-a --version=tpu-vm-tf-2.16.1-pod-pjrt --accelerator-type=v5litepod-16 --spot
+# Data preparation
+The dataset can befound from [openfwi/datasets](https://smileunc.github.io/projects/openfwi/datasets). I used Vel Family, Fault Family and Style Family and there will be 670GB data in total. Please place the dataset in a different directory from the project code or skypilot will try to uploading the whole dataset.
 
-v2.18.0 ok
-    gcloud compute tpus tpu-vm create test123 --zone=us-central1-a --version=tpu-vm-tf-2.18.0-pod-pjrt-v5e-and-v6 --accelerator-type=v5litepod-16 --spot
+Using the script preprocessing.py to transform the .npy files into .tfrecords for better GCP IO efficiency.
+> python preprocessing --intput-folder folder-to-openfwi --output-folder folder-to-tfrecords
 
-    run:
-        gcloud compute tpus tpu-vm ssh test123 --zone=us-central1-a --worker=all --command="sudo apt-get update && pip install --upgrade pip && pip install tensorflow-tpu==2.18.0 -f https://storage.googleapis.com/libtpu-tf-releases/index.html --force-reinstall"
+And then upload to the gcp bucket:
+> gsutil -m cp -r folder-to-tfrecords/train gs://openfwi_tfrecord/
+> gsutil -m cp -r folder-to-tfrecords/valid gs://openfwi_valid_tfrecords/
 
-# v6e-4
-v2.16.1 failed, can't recognize TPU device.
-    gcloud compute tpus tpu-vm create test123 --zone=us-central1-b --version=tpu-vm-tf-2.16.1-pjrt --accelerator-type=v6e-4 --spot
-
-v2.18.0 failed, recognize TPU devices but crush while initialize strategy.
-    gcloud compute tpus tpu-vm create test123 --zone=us-central1-b --version=tpu-vm-tf-2.18.0-pjrt-v5e-and-v6 --accelerator-type=v6e-4 --spot
-
-    run:
-        sudo apt-get update
-        pip install --upgrade pip
-        pip install tensorflow-tpu==2.18.0 -f https://storage.googleapis.com/libtpu-tf-releases/index.html --force-reinstall
-
-# v6e-16
-v2.19.0 failed.
-gcloud compute tpus tpu-vm create test123 --zone=us-central1-b --version=tpu-vm-tf-2.19.0-pod-pjrt --accelerator-type=v6e-16 --spot
-    run:
-        gcloud compute tpus tpu-vm ssh test123 --zone=us-central1-b --worker=all --command="unset LD_PRELOAD python test_tpuv6.py"
-        
+# skypilot run
+> sky launch -c openfwi-tpu sk_config.yaml
